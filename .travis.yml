@@ -1,0 +1,65 @@
+os: linux
+dist: bionic
+addons:                    
+  apt:                     
+    packages:              
+      - python3-pip        
+      - python3-setuptools 
+env:
+  matrix:
+  - VERSION=18.0.4 LATEST_MINOR=true LATEST=true PLAT=linux/amd64
+  - VERSION=17.0.6 LATEST_MINOR=true PLAT=linux/amd64
+  - VERSION=16.0.9 LATEST_MINOR=true PLAT=linux/amd64
+  - VERSION=18.0.4 LATEST_MINOR=true LATEST=true PLAT=linux/arm/v7
+  - VERSION=17.0.6 LATEST_MINOR=true PLAT=linux/arm/v7
+  - VERSION=16.0.9 LATEST_MINOR=true PLAT=linux/arm/v7
+before_install:
+  # Configure environment so changes are picked up when the Docker daemon is restarted after upgrading
+  - echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+  - export DOCKER_CLI_EXPERIMENTAL=enabled
+  - docker run --rm --privileged docker/binfmt
+  # Upgrade to Docker CE 19.03 for BuildKit support
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - docker buildx create --name builder --use
+  - docker buildx ls
+  - sudo apt-get install -y pwgen
+  - docker --version
+  - docker-compose --version
+  - |
+    if docker pull --platform ${PLAT} tob123/nextcloud-ma:${VERSION}; then
+      echo "docker pull is allowed to fail"
+    fi
+#  - docker-compose -f ./ac/docker-compose.yaml up -d
+# docker pull does not speed things up for this build
+#  - docker pull tob123/nextcloud-staging:${VERSION}
+  - pip3 install --user anchorecli        
+  - export PATH="$HOME/.local/bin/:$PATH" 
+install:
+  - export NC_PASS_CI=`pwgen -s -N1 20`
+  - export DB_PASS_CI=`pwgen -s -N1 20`
+  - export MYSQL_ROOT_PASSWORD_CI=`pwgen -s -N1 20`
+  - docker buildx build --platform ${PLAT} --arg NV_VER=$(VERSION) --tag tob123/nextcloud-staging-ma:${NC_VER} --load
+  - docker-compose -f ./nc/docker-compose.test.yml up -d
+  - docker container ls
+  - docker inspect --format="{{json .State.Health.Status}}" nc_sut_1
+  - |
+    SUT_HEALTH="notok" && counter=0
+    while [ $SUT_HEALTH != "healthy" ] && [ $counter -le 60 ]; do
+    SUT_HEALTH=$(docker inspect --format="{{json .State.Health.Status}}" nc_sut_1 | tr -d '"')
+    sleep 2
+    counter=$(( $counter + 1 ))
+    echo $counter
+    if [ $counter -eq 60 ]; then
+    echo $counter
+    docker logs nc_sut_1
+    exit 1
+    fi
+    done
+  - docker inspect --format="{{json .State.Health.Status}}" nc_sut_1
+  - docker logs nc_sut_1
+  - echo "$DOCKER_HUB_P" | docker login -u "$DOCKER_HUB_U" --password-stdin
+  - docker container ls
+  - docker image ls

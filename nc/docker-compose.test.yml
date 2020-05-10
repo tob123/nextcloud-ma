@@ -1,0 +1,40 @@
+version: "2.4"
+
+services:
+  sut:
+    image: tob123/nextcloud:{NC_VER}
+    container_name: nc_sut_1
+    networks:
+      front:
+      back:
+    user: apache
+    environment:
+      - DB_TYPE=mysql
+      - DB_NAME=nextcloud
+      - DB_HOST=sut-db
+      - DB_USER=nextcloud
+      - DB_PASS=test
+      - NC_ADMIN=admin1234
+      - NC_PASS=test
+    depends_on: 
+      - sut-db
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/checkcontainer_ci.sh"]
+
+  sut-db:
+    image: mariadb
+    networks:
+      back:
+    environment:
+      - MYSQL_ROOT_PASSWORD=test
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=test
+#    healthcheck:
+#      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+#      timeout: 40s
+#      retries: 10
+networks:
+  front:
+  back:
+    internal: true
