@@ -1,8 +1,8 @@
-version: "2.4"
+version: "3"
 
 services:
   sut:
-    image: tob123/nextcloud-ma-staging:{VERSION}
+    image: "tob123/nextcloud-ma-staging:${VERSION}"
     container_name: nc_sut_1
     networks:
       front:
