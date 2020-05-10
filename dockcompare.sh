@@ -5,8 +5,8 @@
 #LATEST_MINOR="yes"
 #
 # the rest is locally in this script
-PROD_REPO="docker.io/tob123/nextcloud"
-STG_REPO="docker.io/tob123/nextcloud-staging"
+PROD_REPO="docker.io/tob123/nextcloud-ma"
+STG_REPO="docker.io/tob123/nextcloud-ma-staging"
 AC_EXEC="anchore-cli"
 IMAGE_COMPARE="false"
 PROD_PUSH="false"
