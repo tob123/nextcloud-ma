@@ -41,7 +41,7 @@ install:
   - export NC_PASS_CI=`pwgen -s -N1 20`
   - export DB_PASS_CI=`pwgen -s -N1 20`
   - export MYSQL_ROOT_PASSWORD_CI=`pwgen -s -N1 20`
-  - docker buildx build --platform ${PLAT} --arg NV_VER=${NC_VER} --tag tob123/nextcloud-staging-ma:${NC_VER} --load
+  - docker buildx build --platform ${PLAT} --build-arg NC_VER=${NC_VER} --tag tob123/nextcloud-staging-ma:${NC_VER} --load nc
   - docker-compose -f ./nc/docker-compose.test.yml up -d
   - docker container ls
   - docker inspect --format="{{json .State.Health.Status}}" nc_sut_1
