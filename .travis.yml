@@ -7,11 +7,11 @@ addons:
       - python3-setuptools 
 env:
   matrix:
-  - VERSION=18.0.4 LATEST_MINOR=true LATEST=true PLAT=linux/amd64
-  - VERSION=17.0.6 LATEST_MINOR=true PLAT=linux/amd64
+          #  - VERSION=18.0.4 LATEST_MINOR=true LATEST=true PLAT=linux/amd64
+          #  - VERSION=17.0.6 LATEST_MINOR=true PLAT=linux/amd64
   - VERSION=16.0.9 LATEST_MINOR=true PLAT=linux/amd64
-  - VERSION=18.0.4 LATEST_MINOR=true LATEST=true PLAT=linux/arm/v7
-  - VERSION=17.0.6 LATEST_MINOR=true PLAT=linux/arm/v7
+    #  - VERSION=18.0.4 LATEST_MINOR=true LATEST=true PLAT=linux/arm/v7
+    #  - VERSION=17.0.6 LATEST_MINOR=true PLAT=linux/arm/v7
   - VERSION=16.0.9 LATEST_MINOR=true PLAT=linux/arm/v7
 before_install:
   # Configure environment so changes are picked up when the Docker daemon is restarted after upgrading
@@ -60,7 +60,7 @@ install:
     done
   - docker inspect --format="{{json .State.Health.Status}}" nc_sut_1
   - docker logs nc_sut_1
-  - echo "$DOCKER_HUB_P" | docker login -u "$DOCKER_HUB_U" --password-stdin
+  - echo "$DOCKER_HUB_P" | docker login --username "$DOCKER_HUB_U" --password-stdin
   - docker container ls
   - docker image ls
   - bash dockpush.sh
