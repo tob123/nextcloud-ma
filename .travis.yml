@@ -65,3 +65,7 @@ script:
   - anchore-cli image add docker.io/tob123/nextcloud-ma-staging:${VERSION}     
   - anchore-cli image wait docker.io/tob123/nextcloud-ma-staging:${VERSION}    
   - anchore-cli evaluate check docker.io/tob123/nextcloud-ma-staging:${VERSION}
+deploy:
+  provider: script
+  script: bash dockcompare.sh
+
