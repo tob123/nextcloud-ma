@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -x
+set -ex
 #these 3 variables are set by travis. for example:
 #VERSION="14.0.7"
 #VERSION_MAJOR="14"
@@ -52,7 +52,7 @@ tag_push () {
 }
 tag_push_latest () {
 	docker buildx build \
-	--platform linux/amd64,linux/arm/v7 
+	--platform linux/amd64,linux/arm/v7 \
 	--build-arg NC_VER=${VERSION} \
 	--tag ${PROD_REPO}:${VERSION} \
 	--tag ${PROD_REPO}:${VERSION_MAJOR} \
